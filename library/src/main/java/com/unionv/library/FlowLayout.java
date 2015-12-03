@@ -123,7 +123,6 @@ public class FlowLayout
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        //TODO:
 
         //布局line
         //获取paddingtop的值
@@ -215,6 +214,11 @@ public class FlowLayout
 
         public void layout(int left, int top) {
 
+            //获取每一行剩余的宽度
+            int extraWidth = mLineMaxWidth - mLineUsedWidth;
+            //计算平局每一个孩子可以额外分配的宽度
+            int avgWidth = (int) (extraWidth * 1f / mViews.size() + 0.5f);
+
             //遍历一行中的每一个孩子
             for (int i = 0; i < mViews.size(); i++) {
                 View child = mViews.get(i);
@@ -222,6 +226,22 @@ public class FlowLayout
                 //获取子控件测量后的宽高
                 int childWidth  = child.getMeasuredWidth();
                 int childHeight = child.getMeasuredHeight();
+
+                //如果有剩余宽度,那么重新期望一下孩子的宽高
+                if (avgWidth > 0) {
+
+                    int childMeasureWidth = MeasureSpec.makeMeasureSpec(childWidth + avgWidth,
+                                                                        MeasureSpec.EXACTLY);
+
+                    int childMeasureHeight = MeasureSpec.makeMeasureSpec(childHeight,
+                                                                         MeasureSpec.EXACTLY);
+
+                    child.measure(childMeasureWidth, childMeasureHeight);
+
+                    //重新获取孩子的宽高
+                    childWidth = child.getMeasuredWidth();
+                    childHeight = child.getMeasuredHeight();
+                }
 
                 //第一行第一个的情况
                 int l = left;
