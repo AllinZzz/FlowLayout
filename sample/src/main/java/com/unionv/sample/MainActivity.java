@@ -4,9 +4,13 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
+import android.view.Window;
 import android.widget.TextView;
 
 import com.unionv.library.FlowLayout;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
 
 public class MainActivity
         extends AppCompatActivity
@@ -58,12 +62,17 @@ public class MainActivity
                                            "万年历-农历黄历",
                                            "支付宝钱包"};
 
-    private FlowLayout mFlowLayout;
+    @Bind(R.id.flowLayout)
+    protected FlowLayout mFlowLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //去掉title栏
+       requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        ButterKnife.bind(this);
 
         for (int i = 0; i < mDatas.length; i++) {
 

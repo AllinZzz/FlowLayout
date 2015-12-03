@@ -2,6 +2,7 @@ package com.unionv.library;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -20,8 +21,9 @@ import java.util.List;
 public class FlowLayout
         extends ViewGroup
 {
+    private static final String     TAG    = "FlowLayout";
     //用来关系当前布局中的所有行
-    private List<Line> mLines = new ArrayList<>();
+    private              List<Line> mLines = new ArrayList<>();
 
     //当前行
     private Line mCurrentLine;
@@ -43,6 +45,12 @@ public class FlowLayout
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
+        Log.d(TAG, "onMeasure");
+
+        //每次测量清空一下容器
+        mLines.clear();
+        mCurrentLine = null;
+
         int width = MeasureSpec.getSize(widthMeasureSpec);
 
         int childWidth = width - getPaddingLeft() - getPaddingRight();
@@ -62,9 +70,9 @@ public class FlowLayout
 
             //测量好一个孩子,在当前位置添加到布局中
             //如果布局中一行都没有
-            if(mLines.size() == 0) {
+            if (mCurrentLine == null) {
                 //一行都没有
-                mCurrentLine = new Line(childWidth,mChildHorizontalSpace);
+                mCurrentLine = new Line(childWidth, mChildHorizontalSpace);
                 //将行添加到管理行的集合中
                 mLines.add(mCurrentLine);
 
@@ -73,12 +81,12 @@ public class FlowLayout
             } else {
                 //布局中已经存在至少一行,那么可以直接将孩子添加到line中去
                 //不过要先判断当前行是否可以容纳得下该孩子
-                if(mCurrentLine.canAdd(child)) {
+                if (mCurrentLine.canAdd(child)) {
                     //可以容纳
                     mCurrentLine.addChild(child);
                 } else {
                     //容纳不下,那么得新建一行,
-                    mCurrentLine = new Line(childWidth,mChildHorizontalSpace);
+                    mCurrentLine = new Line(childWidth, mChildHorizontalSpace);
 
                     //将新的一行,添加到布局中去
                     mLines.add(mCurrentLine);
@@ -86,16 +94,10 @@ public class FlowLayout
                     //将孩子,添加到line中去
                     mCurrentLine.addChild(child);
                 }
-
             }
-
         }
-
         //2.设置自己的宽高
         //宽度使用父亲期望的宽度
-
-
-
         //所有行的高度和 + 行和行的间隙和 + paddingTop + paddingBottom;
         int height = getPaddingTop() + getPaddingBottom();
 
@@ -111,12 +113,25 @@ public class FlowLayout
 
         setMeasuredDimension(width, height);
 
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        //super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         //TODO:
+
+        //布局line
+        //获取paddingtop的值
+        int top = getPaddingTop();
+        for (int i = 0; i < mLines.size(); i++) {
+            Line line = mLines.get(i);
+
+            //第一行的情况是,top就是padddingtop
+            line.layout(getPaddingLeft(), top);
+
+            //当第一行布局完了,top的值就会改变
+            top += line.mLineHeight + mLineVerticalSpace;
+        }
     }
 
     private class Line {
@@ -193,5 +208,31 @@ public class FlowLayout
             mViews.add(view);
         }
 
+        public void layout(int left, int top) {
+
+            //遍历一行中的每一个孩子
+            for (int i = 0; i < mViews.size(); i++) {
+                View child = mViews.get(i);
+
+                //获取子控件测量后的宽高
+                int childWidth  = child.getMeasuredWidth();
+                int childHeight = child.getMeasuredHeight();
+
+                //第一行第一个的情况
+                int l = left;
+                int t = top;
+                int r = l + childWidth;
+                int b = t + childHeight;
+
+                child.layout(l, t, r, b);
+
+                //第一行其他个的情况,top和bottom不变,left和right变,
+                //然而,right的变化是随着left的改变而变,因此只需要
+                //在每一次的layout后,更改left的值即可
+                left += childWidth + mSpace;
+
+            }
+
+        }
     }
 }
