@@ -4,6 +4,8 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
 
+import java.util.List;
+
 /**
  * @项目名: FlowLayout
  * @包名: com.unionv.library
@@ -16,6 +18,8 @@ import android.view.ViewGroup;
 public class FlowLayout
         extends ViewGroup
 {
+    private List<Line> mLines;
+
     public FlowLayout(Context context) {
         super(context);
     }
@@ -33,5 +37,9 @@ public class FlowLayout
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         //TODO:
+    }
+
+    private class Line {
+
     }
 }
