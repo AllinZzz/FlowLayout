@@ -23,6 +23,15 @@ public class FlowLayout
     //用来关系当前布局中的所有行
     private List<Line> mLines = new ArrayList<>();
 
+    //当前行
+    private Line mCurrentLine;
+
+    //控件之间的间隙
+    private int mChildHorizontalSpace = 15;
+
+    //行和行之间的间隙
+    private int mLineVerticalSpace = 15;
+
     public FlowLayout(Context context) {
         super(context);
     }
@@ -33,7 +42,75 @@ public class FlowLayout
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+
+        int childWidth = width - getPaddingLeft() - getPaddingRight();
         //TODO:
+        //1.测量孩子
+        //获取孩子的个数
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            if (child.getVisibility() == View.GONE) {
+                //不测量,gone不占位置,invisible占位置
+                continue;
+            }
+
+            //测量每一个孩子,如果孩子都是自适应宽度(wrap_content),那么使用下面的测量方法
+            measureChild(child, widthMeasureSpec, heightMeasureSpec);
+
+            //测量好一个孩子,在当前位置添加到布局中
+            //如果布局中一行都没有
+            if(mLines.size() == 0) {
+                //一行都没有
+                mCurrentLine = new Line(childWidth,mChildHorizontalSpace);
+                //将行添加到管理行的集合中
+                mLines.add(mCurrentLine);
+
+                //同时将view添加到行中
+                mCurrentLine.addChild(child);
+            } else {
+                //布局中已经存在至少一行,那么可以直接将孩子添加到line中去
+                //不过要先判断当前行是否可以容纳得下该孩子
+                if(mCurrentLine.canAdd(child)) {
+                    //可以容纳
+                    mCurrentLine.addChild(child);
+                } else {
+                    //容纳不下,那么得新建一行,
+                    mCurrentLine = new Line(childWidth,mChildHorizontalSpace);
+
+                    //将新的一行,添加到布局中去
+                    mLines.add(mCurrentLine);
+
+                    //将孩子,添加到line中去
+                    mCurrentLine.addChild(child);
+                }
+
+            }
+
+        }
+
+        //2.设置自己的宽高
+        //宽度使用父亲期望的宽度
+
+
+
+        //所有行的高度和 + 行和行的间隙和 + paddingTop + paddingBottom;
+        int height = getPaddingTop() + getPaddingBottom();
+
+        for (int i = 0; i < mLines.size(); i++) {
+            Line line = mLines.get(i);
+            height += line.mLineHeight;
+
+            //如果不是第一行,那么需要加上行和行之间的垂直间隙
+            if (i != mLines.size() - 1) {
+                height += mLineVerticalSpace;
+            }
+        }
+
+        setMeasuredDimension(width, height);
+
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
