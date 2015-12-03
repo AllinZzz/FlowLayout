@@ -42,6 +42,11 @@ public class FlowLayout
         super(context, attrs);
     }
 
+    public void setSpace(int horizontal, int vertical) {
+        this.mChildHorizontalSpace = horizontal;
+        this.mLineVerticalSpace = vertical;
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 

@@ -4,7 +4,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
-import android.view.Window;
 import android.widget.TextView;
 
 import com.unionv.library.FlowLayout;
@@ -68,11 +67,14 @@ public class MainActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         //去掉title栏
-       requestWindowFeature(Window.FEATURE_NO_TITLE);
+       // requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         ButterKnife.bind(this);
+
+        mFlowLayout.setPadding(10, 10, 10, 10);
+        mFlowLayout.setSpace(10, 10);
 
         for (int i = 0; i < mDatas.length; i++) {
 
